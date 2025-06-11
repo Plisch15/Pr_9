@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кешування та оптимізація</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            transition: transform 0.3s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button, select {
+            padding: 8px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .settings {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .dark-theme {
+            background-color: #333;
+            color: #fff;
+        }
+        .dark-theme .settings {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Оптимізація веб-сайту</h1>
+    
+    <!-- Форма для введення даних -->
+    <form id="userForm">
+        <h2>Профіль користувача</h2>
+        <input type="text" name="username" id="username" placeholder="Ім'я користувача">
+        <input type="email" name="email" id="email" placeholder="Email">
+        <button type="submit">Зберегти</button>
+    </form>
+    
+    <!-- Налаштування користувача -->
+    <div class="settings">
+        <h2>Налаштування</h2>
+        <label for="theme">Тема:</label>
+        <select id="theme">
+            <option value="light">Світла тема</option>
+            <option value="dark">Темна тема</option>
+        </select>
+        
+        <label for="language">Мова:</label>
+        <select id="language">
+            <option value="uk">Українська</option>
+            <option value="en">Англійська</option>
+        </select>
+    </div>
+    
+    <!-- Галерея зображень -->
+    <div class="gallery">
+    <h2>Галерея</h2>  
+    <div id="imageGallery">
+        <img src="C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-63930_640.jpg" alt="Автомобіль 1">
+        <img src="C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-1376190_640.jpg" alt="Автомобіль 2">
+        <img src="C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-2255161_640 (1).jpg" alt="Автомобіль 3">
+    </div>
+</div>
+    
+    <!-- Динамічний контент -->
+    <div id="dynamicContent">
+        <h2>Останні новини</h2>
+        <div id="newsContainer"></div>
+    </div>
+
+    <script>
+        // Збереження даних форми в localStorage
+        document.getElementById('userForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value
+            };
+            localStorage.setItem('userData', JSON.stringify(userData));
+            alert('Дані збережено!');
+        });
+        
+        // Завантаження збережених даних
+        function loadUserData() {
+            const savedData = localStorage.getItem('userData');
+            if (savedData) {
+                const userData = JSON.parse(savedData);
+                document.getElementById('username').value = userData.username || '';
+                document.getElementById('email').value = userData.email || '';
+            }
+        }
+        
+        // Кешування зображень
+        const imageCache = new Map();
+        const galleryImages = [
+            "C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-63930_640.jpg",
+            "C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-1376190_640.jpg",
+            "C:\Users\Al6\OneDrive\Робочий стіл\Практична робота №9. Налаштування кешування та стиснення веб-ресурсів\Images\car-2255161_640 (1).jpg"
+        ];
+        
+        async function loadGallery() {
+            const gallery = document.getElementById('imageGallery');
+            
+            for (const imgUrl of galleryImages) {
+                if (imageCache.has(imgUrl)) {
+                    gallery.appendChild(imageCache.get(imgUrl));
+                } else {
+                    const img = new Image();           
+                    img.loading = 'lazy';
+                    gallery.appendChild(img);
+                    imageCache.set(imgUrl, img);
+                }
+            }
+        }
+        
+        // Налаштування теми
+        function applyTheme(theme) {
+            document.body.className = theme === 'dark' ? 'dark-theme' : '';
+        }
+        
+        // Збереження налаштувань
+        function saveSettings() {
+            const theme = document.getElementById('theme').value;
+            const language = document.getElementById('language').value;
+            
+            localStorage.setItem('theme', theme);
+            localStorage.setItem('language', language);
+            
+            applyTheme(theme);
+        }
+        
+        // Завантаження налаштувань
+        function loadSettings() {
+            const theme = localStorage.getItem('theme') || 'light';
+            const language = localStorage.getItem('language') || 'uk';
+            
+            document.getElementById('theme').value = theme;
+            document.getElementById('language').value = language;
+            
+            applyTheme(theme);
+        }
+        
+        // Обробники подій для налаштувань
+        document.getElementById('theme').addEventListener('change', saveSettings);
+        document.getElementById('language').addEventListener('change', saveSettings);
+        
+        // Кешування API-даних
+        const apiCache = new Map();
+        
+        async function loadDynamicContent() {
+            const apiUrl = 'https://jsonplaceholder.typicode.com/posts?_limit=3';
+            let data;
+            
+            if (apiCache.has(apiUrl)) {
+                data = apiCache.get(apiUrl);
+                renderNews(data);
+            } else {
+                try {
+                    const response = await fetch(apiUrl);
+                    data = await response.json();
+                    apiCache.set(apiUrl, data);
+                    renderNews(data);
+                } catch (error) {
+                    console.error('Помилка завантаження даних:', error);
+                    document.getElementById('newsContainer').innerHTML = 
+                        '<p>Не вдалося завантажити новини. Спробуйте пізніше.</p>';
+                }
+            }
+        }
+        
+        function renderNews(posts) {
+            const container = document.getElementById('newsContainer');
+            container.innerHTML = posts.map(post => `
+                <div style="margin-bottom: 15px; padding: 10px; border: 1px solid #ddd;">
+                    <h3>${post.title}</h3>
+                    <p>${post.body}</p>
+                </div>
+            `).join('');
+        }
+        
+        // Ініціалізація при завантаженні сторінки
+        window.addEventListener('load', function() {
+            loadUserData();
+            loadSettings();
+            loadGallery();
+            loadDynamicContent();
+            
+            // Реєстрація Service Worker
+            registerServiceWorker();
+        });
+        
+        // Service Worker прямо в HTML
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const swScript = `
+                    const CACHE_NAME = 'my-site-cache-v1';
+                    const urlsToCache = [
+                        '/',
+                        'https://via.placeholder.com/300/09f/fff.jpg',
+                        'https://via.placeholder.com/300/f90/fff.jpg',
+                        'https://via.placeholder.com/300/0f9/fff.jpg'
+                    ];
+                    
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => {
+                                    return cache.addAll(urlsToCache);
+                                })
+                        );
+                    });
+                    
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => {
+                                    if (response) {
+                                        return response;
+                                    }
+                                    return fetch(event.request);
+                                })
+                        );
+                    });
+                `;
+                
+                const blob = new Blob([swScript], { type: 'application/javascript' });
+                const swUrl = URL.createObjectURL(blob);
+                
+                navigator.serviceWorker.register(swUrl)
+                    .then(registration => {
+                        console.log('Service Worker зареєстровано успішно');
+                    })
+                    .catch(error => {
+                        console.log('Помилка реєстрації Service Worker:', error);
+                    });
+            }
+        }
+    </script>
+</body>
+</html>
